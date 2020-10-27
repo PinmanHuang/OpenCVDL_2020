@@ -83,15 +83,23 @@ class PyMainWindow(QMainWindow, Ui_MainWindow):
     # === Q3 ===
     def gaussian_blur_2(self):
         print('Gaussian blur')
+        opencv = OpenCv()
+        opencv.Q3_1()
 
     def sobel_x(self):
         print('Sobel x')
+        opencv = OpenCv()
+        opencv.Q3_2()
     
     def sobel_y(self):
         print('Sobel x')
+        opencv = OpenCv()
+        opencv.Q3_3()
     
     def magnitude(self):
         print('Magnitude')
+        opencv = OpenCv()
+        opencv.Q3_4()
 
     # === Q4 ===
     def rotation_changed(self, text):
@@ -201,7 +209,156 @@ class OpenCv(object):
         cv2.imshow('Bilateral', bilateral_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+    
+    def convolve2d(self, image, kernel, padding=0, strides=1):
+        # ref: https://medium.com/analytics-vidhya/2d-convolution-using-python-numpy-43442ff5f381
+        # cross Correlation
+        kernel = np.flipud(np.fliplr(kernel))
 
+        # Gather Shapes of Kernel + Image + Padding
+        xKernShape = kernel.shape[0]
+        yKernShape = kernel.shape[1]
+        xImgShape = image.shape[0]
+        yImgShape = image.shape[0]
+
+        # Shape of Output Convolution
+        xOutput = int(((xImgShape - xKernShape + 2 * padding) / strides) + 1)
+        yOutput = int(((yImgShape - yKernShape + 2 * padding) / strides) + 1)
+        output = np.zeros_like(image)
+
+        # Apply Equal Padding to All Sides
+        if padding != 0:
+            imagePadded = np.zeros((image.shape[0] + padding*2, image.shape[1] + padding*2))
+            imagePadded[int(padding):int(-1 * padding), int(padding):int(-1 * padding)] = image
+            print(imagePadded)
+        else:
+            imagePadded = image
+
+        # Iterate through image
+        for y in range(image.shape[1]):
+            # Exit Convolution
+            if y > image.shape[1] - yKernShape:
+                break
+            # Only Convolve if y has gone down by the specified Strides
+            if y % strides == 0:
+                for x in range(image.shape[0]):
+                    # Go to next row once kernel is out of bounds
+                    if x > image.shape[0] - xKernShape:
+                        break
+                    try:
+                        # Only Convolve if x has moved by the specified Strides
+                        if x % strides == 0:
+                            output[x, y] = abs((kernel * imagePadded[x: x + xKernShape, y: y + yKernShape]).sum())
+                    except:
+                        break
+
+        return output
+
+
+    def Q3_1(self):
+        img = cv2.imread('./Q3_Image/Chihiro.jpg', 0)
+        # Gaussian kernel
+        x, y = np.mgrid[-1:2, -1:2]
+        gaussian_kernel = np.exp(-(x**2+y**2))
+        # Normalization
+        gaussian_kernel = gaussian_kernel / gaussian_kernel.sum()
+        # Convolution
+        gaussian_img = self.convolve2d(img, gaussian_kernel)
+        
+        cv2.namedWindow('Grayscale', cv2.WINDOW_NORMAL)
+        cv2.imshow('Grayscale', img)
+        cv2.namedWindow('Gaussian Blur', cv2.WINDOW_NORMAL)
+        cv2.imshow('Gaussian Blur', gaussian_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    def Q3_2(self):
+        img = cv2.imread('./Q3_Image/Chihiro.jpg', 0)
+        # Gaussian kernel
+        x, y = np.mgrid[-1:2, -1:2]
+        gaussian_kernel = np.exp(-(x**2+y**2))
+        # Normalization
+        gaussian_kernel = gaussian_kernel / gaussian_kernel.sum()
+
+        # Sobel X kernel
+        sobel_x_kernel = [[-1, 0, 1],
+                          [-2, 0, 2],
+                          [-1, 0, 1]]
+        # Convolution
+        gaussian_img = self.convolve2d(img, gaussian_kernel)
+        sobel_x_img = self.convolve2d(gaussian_img, sobel_x_kernel)
+        sobel_x_img = cv2.normalize(sobel_x_img, None, 0, 255, cv2.NORM_MINMAX)
+
+        cv2.namedWindow('Gaussian Blur', cv2.WINDOW_NORMAL)
+        cv2.imshow('Gaussian Blur', gaussian_img)
+        cv2.namedWindow('Sobel X', cv2.WINDOW_NORMAL)
+        cv2.imshow('Sobel X', sobel_x_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    def Q3_3(self):
+        img = cv2.imread('./Q3_Image/Chihiro.jpg', 0)
+        # Gaussian kernel
+        x, y = np.mgrid[-1:2, -1:2]
+        gaussian_kernel = np.exp(-(x**2+y**2))
+        # Normalization
+        gaussian_kernel = gaussian_kernel / gaussian_kernel.sum()        
+
+        # Sobel Y kernel
+        sobel_y_kernel = [[1, 2, 1],
+                          [0, 0, 0],
+                          [-1, -2, -1]]
+        # Convolution
+        gaussian_img = self.convolve2d(img, gaussian_kernel)
+        sobel_y_img = self.convolve2d(gaussian_img, sobel_y_kernel)
+        sobel_y_img = cv2.normalize(sobel_y_img, None, 0, 255, cv2.NORM_MINMAX)
+
+        cv2.namedWindow('Gaussian Blur', cv2.WINDOW_NORMAL)
+        cv2.imshow('Gaussian Blur', gaussian_img)
+        cv2.namedWindow('Sobel Y', cv2.WINDOW_NORMAL)
+        cv2.imshow('Sobel Y', sobel_y_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    def Q3_4(self):
+        img = cv2.imread('./Q3_Image/Chihiro.jpg', 0)
+        # Gaussian kernel
+        x, y = np.mgrid[-1:2, -1:2]
+        gaussian_kernel = np.exp(-(x**2+y**2))
+        # Normalization
+        gaussian_kernel = gaussian_kernel / gaussian_kernel.sum()
+
+        # Sobel X kernel
+        sobel_x_kernel = [[-1, 0, 1],
+                          [-2, 0, 2],
+                          [-1, 0, 1]]
+        # Sobel Y kernel
+        sobel_y_kernel = [[1, 2, 1],
+                          [0, 0, 0],
+                          [-1, -2, -1]]
+        
+        # Convolution
+        gaussian_img = self.convolve2d(img, gaussian_kernel)
+        sobel_x_img = self.convolve2d(gaussian_img, sobel_x_kernel)
+        # sobel_x_img = cv2.normalize(sobel_x_img, None, 0, 255, cv2.NORM_MINMAX)
+        sobel_y_img = self.convolve2d(gaussian_img, sobel_y_kernel)
+        # sobel_y_img = cv2.normalize(sobel_y_img, None, 0, 255, cv2.NORM_MINMAX)
+
+        # Magnitude
+        magnitude_img = np.zeros(sobel_x_img.shape, dtype='uint8')
+        for x in range(sobel_x_img.shape[0]):
+            for y in range(sobel_x_img.shape[1]):
+                magnitude_img[x, y] = (sobel_x_img[x, y]**2 + sobel_y_img[x, y]**2)**0.5
+        magnitude_img = cv2.normalize(magnitude_img, None, 0, 255, cv2.NORM_MINMAX)
+
+        cv2.namedWindow('Sobel X', cv2.WINDOW_NORMAL)
+        cv2.imshow('Sobel X', sobel_x_img)
+        cv2.namedWindow('Sobel Y', cv2.WINDOW_NORMAL)
+        cv2.imshow('Sobel Y', sobel_y_img)
+        cv2.namedWindow('Magnitude', cv2.WINDOW_NORMAL)
+        cv2.imshow('Magnitude', magnitude_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
