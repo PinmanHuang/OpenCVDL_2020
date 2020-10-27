@@ -32,10 +32,10 @@ class PyMainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_10.clicked.connect(self.sobel_y)
         self.pushButton_11.clicked.connect(self.magnitude)
         # Q4
-        self.rotation = 0
-        self.scaling = 0
-        self.tx = 0
-        self.ty = 0
+        self.rotation = ""
+        self.scaling = ""
+        self.tx = ""
+        self.ty = ""
         self.lineEdit.textChanged.connect(self.rotation_changed)
         self.lineEdit_2.textChanged.connect(self.scaling_changed)
         self.lineEdit_3.textChanged.connect(self.tx_changed)
@@ -103,21 +103,23 @@ class PyMainWindow(QMainWindow, Ui_MainWindow):
 
     # === Q4 ===
     def rotation_changed(self, text):
-        self.rotation = int(text)
+        self.rotation = text
 
     def scaling_changed(self, text):
-        self.scaling = int(text)
+        self.scaling = text
 
     def tx_changed(self, text):
-        self.tx = int(text)
+        self.tx = text
     
     def ty_changed(self, text):
-        self.ty = int(text)
+        self.ty = text
 
     def transformation(self):
         print('transformation')
-        print('rotation: {}\tscaling: {}\ttx: {}\tty: {}'.format(
-            str(self.rotation), str(self.scaling), str(self.tx), str(self.ty)))
+        # print('rotation: {}\tscaling: {}\ttx: {}\tty: {}'.format(
+            # str(self.rotation), str(self.scaling), str(self.tx), str(self.ty)))
+        opencv = OpenCv()
+        opencv.Q4(self.rotation, self.scaling, self.tx, self.ty)
 
 class OpenCv(object):
     def __init__(self):
@@ -254,7 +256,6 @@ class OpenCv(object):
 
         return output
 
-
     def Q3_1(self):
         img = cv2.imread('./Q3_Image/Chihiro.jpg', 0)
         # Gaussian kernel
@@ -359,6 +360,29 @@ class OpenCv(object):
         cv2.imshow('Magnitude', magnitude_img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+    
+    def Q4(self, rotate, scale, tx, ty):
+        # ref: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_geometric_transformations/py_geometric_transformations.html
+        print('rotation: {}\tscaling: {}\ttx: {}\tty: {}'.format(
+            rotate, scale, tx, ty))
+        if not len(rotate) or not len(scale) or not len(tx) or not len(ty):
+            return
+        img = cv2.imread('./Q4_Image/Parrot.png')
+        center = (160, 84)
+        # Rotation
+        rotate_M = cv2.getRotationMatrix2D(center, float(rotate), float(scale))
+        transform_img = cv2.warpAffine(img, rotate_M, (img.shape[1], img.shape[0]))
+        # Translation
+        translation_M = np.float32([[1, 0, float(tx)], [0, 1, float(ty)]])
+        transform_img = cv2.warpAffine(transform_img, translation_M, (img.shape[1], img.shape[0]))
+        
+        img = np.hstack((img, transform_img))
+
+        cv2.namedWindow('Transforms', cv2.WINDOW_NORMAL)
+        cv2.imshow('Transforms', img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
