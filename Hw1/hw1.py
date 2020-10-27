@@ -67,12 +67,18 @@ class PyMainWindow(QMainWindow, Ui_MainWindow):
     # === Q2 ===
     def median_filter(self):
         print('Median filter')
+        opencv = OpenCv()
+        opencv.Q2_1()
 
     def gaussian_blur(self):
         print('Gaussian blur')
+        opencv = OpenCv()
+        opencv.Q2_2()
     
     def bilateral_filter(self):
         print('Bilateral filter')
+        opencv = OpenCv()
+        opencv.Q2_3()
 
     # === Q3 ===
     def gaussian_blur_2(self):
@@ -169,6 +175,32 @@ class OpenCv(object):
                 break
         cv2.destroyAllWindows()
 
+    def Q2_1(self):
+        # ref: https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#ga564869aa33e58769b4469101aac458f9
+        img = cv2.imread('./Q2_Image/Cat.png')
+        median_img = cv2.medianBlur(img, 7)
+        cv2.namedWindow('median', cv2.WINDOW_NORMAL)
+        cv2.imshow('median', median_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    def Q2_2(self):
+        # ref: https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1
+        img = cv2.imread('./Q2_Image/Cat.png')
+        gaussian_img = cv2.GaussianBlur(img, (3, 3), 0)
+        cv2.namedWindow('Gaussian', cv2.WINDOW_NORMAL)
+        cv2.imshow('Gaussian', gaussian_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    def Q2_3(self):
+        # ref: https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#ga9d7064d478c95d60003cf839430737ed
+        img = cv2.imread('./Q2_Image/Cat.png')
+        bilateral_img = cv2.bilateralFilter(img, 9, 90, 90)
+        cv2.namedWindow('Bilateral', cv2.WINDOW_NORMAL)
+        cv2.imshow('Bilateral', bilateral_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
