@@ -290,8 +290,8 @@ class OpenCv(object):
         sobel_x_img = self.convolve2d(gaussian_img, sobel_x_kernel)
         sobel_x_img = cv2.normalize(sobel_x_img, None, 0, 255, cv2.NORM_MINMAX)
 
-        cv2.namedWindow('Gaussian Blur', cv2.WINDOW_NORMAL)
-        cv2.imshow('Gaussian Blur', gaussian_img)
+        # cv2.namedWindow('Gaussian Blur', cv2.WINDOW_NORMAL)
+        # cv2.imshow('Gaussian Blur', gaussian_img)
         cv2.namedWindow('Sobel X', cv2.WINDOW_NORMAL)
         cv2.imshow('Sobel X', sobel_x_img)
         cv2.waitKey(0)
@@ -314,8 +314,8 @@ class OpenCv(object):
         sobel_y_img = self.convolve2d(gaussian_img, sobel_y_kernel)
         sobel_y_img = cv2.normalize(sobel_y_img, None, 0, 255, cv2.NORM_MINMAX)
 
-        cv2.namedWindow('Gaussian Blur', cv2.WINDOW_NORMAL)
-        cv2.imshow('Gaussian Blur', gaussian_img)
+        # cv2.namedWindow('Gaussian Blur', cv2.WINDOW_NORMAL)
+        # cv2.imshow('Gaussian Blur', gaussian_img)
         cv2.namedWindow('Sobel Y', cv2.WINDOW_NORMAL)
         cv2.imshow('Sobel Y', sobel_y_img)
         cv2.waitKey(0)
@@ -352,10 +352,10 @@ class OpenCv(object):
                 magnitude_img[x, y] = (sobel_x_img[x, y]**2 + sobel_y_img[x, y]**2)**0.5
         magnitude_img = cv2.normalize(magnitude_img, None, 0, 255, cv2.NORM_MINMAX)
 
-        cv2.namedWindow('Sobel X', cv2.WINDOW_NORMAL)
-        cv2.imshow('Sobel X', sobel_x_img)
-        cv2.namedWindow('Sobel Y', cv2.WINDOW_NORMAL)
-        cv2.imshow('Sobel Y', sobel_y_img)
+        # cv2.namedWindow('Sobel X', cv2.WINDOW_NORMAL)
+        # cv2.imshow('Sobel X', sobel_x_img)
+        # cv2.namedWindow('Sobel Y', cv2.WINDOW_NORMAL)
+        # cv2.imshow('Sobel Y', sobel_y_img)
         cv2.namedWindow('Magnitude', cv2.WINDOW_NORMAL)
         cv2.imshow('Magnitude', magnitude_img)
         cv2.waitKey(0)
@@ -369,13 +369,14 @@ class OpenCv(object):
             return
         img = cv2.imread('./Q4_Image/Parrot.png')
         center = (160, 84)
-        # Rotation
-        rotate_M = cv2.getRotationMatrix2D(center, float(rotate), float(scale))
-        transform_img = cv2.warpAffine(img, rotate_M, (img.shape[1], img.shape[0]))
+
         # Translation
         translation_M = np.float32([[1, 0, float(tx)], [0, 1, float(ty)]])
-        transform_img = cv2.warpAffine(transform_img, translation_M, (img.shape[1], img.shape[0]))
-        
+        transform_img = cv2.warpAffine(img, translation_M, (img.shape[1], img.shape[0]))
+        # Rotation
+        rotate_M = cv2.getRotationMatrix2D(center, float(rotate), float(scale))
+        transform_img = cv2.warpAffine(transform_img, rotate_M, (img.shape[1], img.shape[0]))
+        # Append two images
         img = np.hstack((img, transform_img))
 
         cv2.namedWindow('Transforms', cv2.WINDOW_NORMAL)
