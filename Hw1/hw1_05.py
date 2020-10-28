@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 import sys
 import numpy as np
 from matplotlib import pyplot as plt
+import cv2
 # Q5
 import torch
 import torch.nn as nn
@@ -22,6 +23,7 @@ from torchsummary import summary
 
 # CUDA
 CUDA_DEVICE_IDEX = 0
+USING_MODEL = 'VGG16_AUG_32_0.01'
 
 class PyMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -163,7 +165,6 @@ class Model(object):
                                  each row is an image(32*32)
     '''
     def Q5_1(self):
-        print('Q5_1')
 
         # Load data
         with open('./cifar-10-batches-py/batches.meta', 'rb') as fo:
@@ -189,11 +190,9 @@ class Model(object):
 
     
     def Q5_2(self):
-        print('Q5_2')
         print('hyperparameters:\nbatch size: '+str(self.batch_size)+'\nlearning rate: '+str(self.learning_rate)+'\noptimizer: '+self.optimizer)
     
     def Q5_3(self):
-        print('Q5_3')
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print('Device: {}'.format(device))
         model = VGG16().to(device)
@@ -201,7 +200,13 @@ class Model(object):
         summary(model, (3, 32, 32))
     
     def Q5_4(self):
-        print('Q5_4')
+        img = cv2.imread('./Q5_Result/'+USING_MODEL+'.png')
+        cv2.namedWindow(USING_MODEL, cv2.WINDOW_NORMAL)
+        cv2.imshow(USING_MODEL, img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    
+    def train(self):
         # Accuracy and loss data
         train_accuracy = []
         test_accuracy = []
@@ -321,11 +326,10 @@ class Model(object):
             plt.yticks((0.2, 0.4, 0.6, 0.8, 1))
             plt.show()
 
-        
-
-        print('Q5_5')
-
-        classes = ('plane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+        if int(test_idx) <0 or int(test_idx) > 9999:
+            print('Testing image index out of range.')
+            return
+        classes = ['plane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
         # Test Dataset
         transform_test = torchvision.transforms.Compose([
             torchvision.transforms.ToTensor(),
@@ -334,7 +338,6 @@ class Model(object):
         test_dataset = torchvision.datasets.CIFAR10(root='./', train=False, download=False, transform=transform_test)
         # test_dataset = torchvision.datasets.CIFAR10(root='./', train=False, download=False, transform=torchvision.transforms.ToTensor())
         test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, num_workers=0)
-        print(test_idx)
         dataiter = iter(test_loader)
         for i in range(int(test_idx)):
             dataiter.next()
@@ -342,14 +345,14 @@ class Model(object):
 
         # Load Model
         model = VGG16()
-        model.load_state_dict(torch.load('./model/VGG16_AUG_32_0.001.pth'))
+        model.load_state_dict(torch.load('./model/'+USING_MODEL+'.pth'))
+        model.eval()
         # Evaluate
         output = model(image)
         softmax = nn.Softmax()
         probability = softmax(output).tolist()[0]
         # show images
         imshow(torchvision.utils.make_grid(image), probability, classes, label)
-        print(probability)
 
 
 if __name__ == '__main__':
