@@ -20,15 +20,20 @@ import random
 # from torchvision import models
 from torchsummary import summary
 
+# CUDA
+CUDA_DEVICE_IDEX = 1
+
 class PyMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(PyMainWindow, self).__init__()
         self.setupUi(self)
+        self.test_image_idx = ""
         self.pushButton_10.clicked.connect(self.show_train_images)
         self.pushButton_11.clicked.connect(self.show_hyperparameters)
         self.pushButton_12.clicked.connect(self.show_model_strucuture)
         self.pushButton_13.clicked.connect(self.show_accuracy)
         self.pushButton_14.clicked.connect(self.test)
+        self.lineEdit.textChanged.connect(self.test_image_changed)
 
     def show_train_images(self):
         print('Show train images')
@@ -53,7 +58,10 @@ class PyMainWindow(QMainWindow, Ui_MainWindow):
     def test(self):
         print('Test')
         model = Model()
-        model.Q5_5()
+        model.Q5_5(self.test_image_idx)
+
+    def test_image_changed(self, text):
+        self.test_image_idx = text
     
 class VGG16(nn.Module):
     def __init__(self, num_classes=10):
@@ -141,9 +149,9 @@ class VGG16(nn.Module):
 class Model(object):
     def __init__(self):
         super(Model, self).__init__()
-        self.batch_size = 256
-        self.learning_rate = 1e-2
-        self.num_epoches = 50
+        self.batch_size = 32
+        self.learning_rate = 1e-3
+        self.num_epoches = 80
         self.optimizer = 'SGD'
         
     '''
@@ -187,17 +195,40 @@ class Model(object):
     def Q5_3(self):
         print('Q5_3')
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print('Device: {}'.format(device))
         model = VGG16().to(device)
         # model = models.vgg16()
         summary(model, (3, 32, 32))
     
     def Q5_4(self):
         print('Q5_4')
+        # Accuracy and loss data
+        train_accuracy = []
+        test_accuracy = []
+        train_loss = []
+        test_loss = []
+        # Transform
+        transform_train = torchvision.transforms.Compose([
+            torchvision.transforms.RandomCrop(32, padding=4),
+            torchvision.transforms.RandomHorizontalFlip(),
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])
+        transform_test = torchvision.transforms.Compose([
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])  # Normalize the test set same as training set without augmentation
+
         # Load data
-        train_dataset = torchvision.datasets.CIFAR10(root='./', train=True, download=False, transform=torchvision.transforms.ToTensor())
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
+        # train_dataset = torchvision.datasets.CIFAR10(root='./', train=True, download=False, transform=torchvision.transforms.ToTensor())
+        train_dataset = torchvision.datasets.CIFAR10(root='./', train=True, download=False, transform=transform_train)
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=2)
+        # test_dataset = torchvision.datasets.CIFAR10(root='./', train=False, download=False, transform=torchvision.transforms.ToTensor())
+        test_dataset = torchvision.datasets.CIFAR10(root='./', train=False, download=False, transform=transform_test)
+        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=self.batch_size, num_workers=2)
         # Create VGG16 model
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda:"+str(CUDA_DEVICE_IDEX) if torch.cuda.is_available() else "cpu")
+        print('Device: {}'.format(device))
         model = VGG16().to(device)
         # Define loss and optimizer
         criterion = nn.CrossEntropyLoss()
@@ -221,11 +252,71 @@ class Model(object):
                 optimizer.step()
 
                 running_loss += float(loss.item())
-            print('epoch {}/{}\tTrain loss: {:.4f}\tTrain accuracy: {:.2f}%'.format(epoch + 1, self.num_epoches, running_loss / (i + 1), correct_pred.item() / (self.batch_size * (i + 1)) * 100))
 
+            # print('epoch {}/{}\tTrain loss: {:.4f}\tTrain accuracy: {:.2f}%'.format(
+            #     epoch + 1,
+            #     self.num_epoches,
+            #     running_loss / (i + 1),                                         # running_loss / (i + 1),
+            #     correct_pred.item() / (self.batch_size * (i + 1)) * 100)        # correct_pred.item() / (self.batch_size * (i + 1)) * 100)
+            # )
+            
+            # Evaluate model
+            model.eval()
+            eval_loss = 0
+            correct_eval = 0
+            for j, eval_data in enumerate(test_loader):
+                img2, label2 = eval_data
+                img2 = img2.to(device)
+                label2 = label2.to(device)
+                # Predicting
+                y_pred2 = model(img2)
+                _, pred2 = torch.max(y_pred2, 1)          # prediction the index of the maximum value location
+                correct_eval += (pred2 == label2).sum()
+                # Loss
+                loss2 = criterion(y_pred2, label2)
+                eval_loss += float(loss2.item())
 
-    def Q5_5(self):
+            train_accuracy.append(correct_pred.item() / (self.batch_size * (i + 1)) * 100)
+            test_accuracy.append(correct_eval.item() / (self.batch_size * (j + 1)) * 100)
+            train_loss.append(running_loss / (i + 1))
+            test_loss.append(eval_loss / (j + 1))
+            print('epoch {}/{}\tTrain loss: {:.4f}\tTrain accuracy: {:.2f}%\tTest loss: {:.4f}\tTest accuracy: {:.2f}%'.format(
+                epoch + 1,
+                self.num_epoches,
+                running_loss / (i + 1),                                         # running_loss / (i + 1),
+                correct_pred.item() / (self.batch_size * (i + 1)) * 100,        # correct_pred.item() / (self.batch_size * (i + 1)) * 100,
+                eval_loss / (j + 1),
+                correct_eval.item() / (self.batch_size * (j + 1)) * 100)
+            )
+            print()
+        torch.save(model.state_dict(), './VGG16_AUG_'+str(self.batch_size)+'_'+str(self.learning_rate)+'.pth')
+        fig = plt.figure()
+        plt.plot(train_accuracy)
+        plt.plot(test_accuracy)
+        plt.title('Accuracy')
+        plt.xlabel('epoch')
+        plt.ylabel('%')
+        plt.legend(['Training', 'Testing'], loc='lower right')
+        plt.show()
+
+        fig = plt.figure()
+        plt.plot(train_loss)
+        plt.title('Loss')
+        plt.xlabel('epoch')
+        plt.ylabel('loss')
+        plt.show()
+
+    def Q5_5(self, test_idx):
         print('Q5_5')
+        print('test image index: {}'.format(test_idx))
+        test_dataset = torchvision.datasets.CIFAR10(root='./', train=False, download=False, transform=torchvision.transforms.ToTensor())
+        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=self.batch_size, num_workers=2)
+        # device = torch.device("cuda:"+str(CUDA_DEVICE_IDEX) if torch.cuda.is_available() else "cpu")
+        # print('Device: {}'.format(device))
+        # model = VGG16().to(device)
+        # model.load_state_dict(torch.load('./model/VGG16_AUG_32_0.01.pth'))
+        # model.eval()
+        print(test_loader)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
