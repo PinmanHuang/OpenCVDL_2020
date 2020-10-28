@@ -21,7 +21,7 @@ import random
 from torchsummary import summary
 
 # CUDA
-CUDA_DEVICE_IDEX = 1
+CUDA_DEVICE_IDEX = 0
 
 class PyMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -307,16 +307,50 @@ class Model(object):
         plt.show()
 
     def Q5_5(self, test_idx):
+
+        # Show image
+        def imshow(img, result_list, class_list, label):
+            img = img / 2 + 0.5     # unnormalize
+            npimg = img.numpy()
+            plt.subplot(2, 1, 1)
+            plt.title('G.T.: '+class_list[label])
+            plt.imshow(np.transpose(npimg, (1, 2, 0)))
+            plt.subplot(2, 1, 2)
+            plt.bar(range(10), result_list, align='center')
+            plt.xticks(range(10), class_list, fontsize=10, rotation=45)
+            plt.yticks((0.2, 0.4, 0.6, 0.8, 1))
+            plt.show()
+
+        
+
         print('Q5_5')
-        print('test image index: {}'.format(test_idx))
-        test_dataset = torchvision.datasets.CIFAR10(root='./', train=False, download=False, transform=torchvision.transforms.ToTensor())
-        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=self.batch_size, num_workers=2)
-        # device = torch.device("cuda:"+str(CUDA_DEVICE_IDEX) if torch.cuda.is_available() else "cpu")
-        # print('Device: {}'.format(device))
-        # model = VGG16().to(device)
-        # model.load_state_dict(torch.load('./model/VGG16_AUG_32_0.01.pth'))
-        # model.eval()
-        print(test_loader)
+
+        classes = ('plane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+        # Test Dataset
+        transform_test = torchvision.transforms.Compose([
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+        ])  # Normalize the test set same as training set without augmentation
+        test_dataset = torchvision.datasets.CIFAR10(root='./', train=False, download=False, transform=transform_test)
+        # test_dataset = torchvision.datasets.CIFAR10(root='./', train=False, download=False, transform=torchvision.transforms.ToTensor())
+        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, num_workers=0)
+        print(test_idx)
+        dataiter = iter(test_loader)
+        for i in range(int(test_idx)):
+            dataiter.next()
+        image, label = dataiter.next()
+
+        # Load Model
+        model = VGG16()
+        model.load_state_dict(torch.load('./model/VGG16_AUG_32_0.001.pth'))
+        # Evaluate
+        output = model(image)
+        softmax = nn.Softmax()
+        probability = softmax(output).tolist()[0]
+        # show images
+        imshow(torchvision.utils.make_grid(image), probability, classes, label)
+        print(probability)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
