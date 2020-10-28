@@ -22,8 +22,12 @@ import random
 from torchsummary import summary
 
 # CUDA
-CUDA_DEVICE_IDEX = 0
-USING_MODEL = 'VGG16_AUG_32_0.01'
+CUDA_DEVICE_IDEX = 1
+BATCH_SIZE = 32
+LEARNING_RATE = 1e-2
+EPOCHES = 80
+OPTIMIZER = 'ADAM'
+USING_MODEL = 'VGG16_'+OPTIMIZER+'_'+str(BATCH_SIZE)+'_'+str(LEARNING_RATE)
 
 class PyMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -55,7 +59,8 @@ class PyMainWindow(QMainWindow, Ui_MainWindow):
     def show_accuracy(self):
         print('Show accuracy')
         model = Model()
-        model.Q5_4()
+        model.train()
+        # model.Q5_4()
 
     def test(self):
         print('Test')
@@ -151,11 +156,6 @@ class VGG16(nn.Module):
 class Model(object):
     def __init__(self):
         super(Model, self).__init__()
-        self.batch_size = 32
-        self.learning_rate = 1e-3
-        self.num_epoches = 80
-        self.optimizer = 'SGD'
-        
     '''
     batches.meta: size is 10,
                   0 to 9 class,
@@ -190,7 +190,7 @@ class Model(object):
 
     
     def Q5_2(self):
-        print('hyperparameters:\nbatch size: '+str(self.batch_size)+'\nlearning rate: '+str(self.learning_rate)+'\noptimizer: '+self.optimizer)
+        print('hyperparameters:\nbatch size: '+str(BATCH_SIZE)+'\nlearning rate: '+str(LEARNING_RATE)+'\noptimizer: '+OPTIMIZER)
     
     def Q5_3(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -227,19 +227,20 @@ class Model(object):
         # Load data
         # train_dataset = torchvision.datasets.CIFAR10(root='./', train=True, download=False, transform=torchvision.transforms.ToTensor())
         train_dataset = torchvision.datasets.CIFAR10(root='./', train=True, download=False, transform=transform_train)
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=2)
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
         # test_dataset = torchvision.datasets.CIFAR10(root='./', train=False, download=False, transform=torchvision.transforms.ToTensor())
         test_dataset = torchvision.datasets.CIFAR10(root='./', train=False, download=False, transform=transform_test)
-        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=self.batch_size, num_workers=2)
+        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE, num_workers=2)
         # Create VGG16 model
         device = torch.device("cuda:"+str(CUDA_DEVICE_IDEX) if torch.cuda.is_available() else "cpu")
         print('Device: {}'.format(device))
         model = VGG16().to(device)
         # Define loss and optimizer
         criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(model.parameters(), lr=self.learning_rate)
+        # optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE)    # SGD
+        optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)   # Adam
         # Train the model
-        for epoch in range(self.num_epoches):
+        for epoch in range(EPOCHES):
             running_loss = 0.0
             correct_pred = 0
             for i, data in enumerate(train_loader):
@@ -257,13 +258,6 @@ class Model(object):
                 optimizer.step()
 
                 running_loss += float(loss.item())
-
-            # print('epoch {}/{}\tTrain loss: {:.4f}\tTrain accuracy: {:.2f}%'.format(
-            #     epoch + 1,
-            #     self.num_epoches,
-            #     running_loss / (i + 1),                                         # running_loss / (i + 1),
-            #     correct_pred.item() / (self.batch_size * (i + 1)) * 100)        # correct_pred.item() / (self.batch_size * (i + 1)) * 100)
-            # )
             
             # Evaluate model
             model.eval()
@@ -281,20 +275,20 @@ class Model(object):
                 loss2 = criterion(y_pred2, label2)
                 eval_loss += float(loss2.item())
 
-            train_accuracy.append(correct_pred.item() / (self.batch_size * (i + 1)) * 100)
-            test_accuracy.append(correct_eval.item() / (self.batch_size * (j + 1)) * 100)
+            train_accuracy.append(correct_pred.item() / (BATCH_SIZE * (i + 1)) * 100)
+            test_accuracy.append(correct_eval.item() / (BATCH_SIZE * (j + 1)) * 100)
             train_loss.append(running_loss / (i + 1))
             test_loss.append(eval_loss / (j + 1))
             print('epoch {}/{}\tTrain loss: {:.4f}\tTrain accuracy: {:.2f}%\tTest loss: {:.4f}\tTest accuracy: {:.2f}%'.format(
                 epoch + 1,
-                self.num_epoches,
-                running_loss / (i + 1),                                         # running_loss / (i + 1),
-                correct_pred.item() / (self.batch_size * (i + 1)) * 100,        # correct_pred.item() / (self.batch_size * (i + 1)) * 100,
+                EPOCHES,
+                running_loss / (i + 1),
+                correct_pred.item() / (BATCH_SIZE * (i + 1)) * 100,
                 eval_loss / (j + 1),
-                correct_eval.item() / (self.batch_size * (j + 1)) * 100)
+                correct_eval.item() / (BATCH_SIZE * (j + 1)) * 100)
             )
             print()
-        torch.save(model.state_dict(), './VGG16_AUG_'+str(self.batch_size)+'_'+str(self.learning_rate)+'.pth')
+        torch.save(model.state_dict(), './VGG16_'+OPTIMIZER+'_'+str(BATCH_SIZE)+'_'+str(LEARNING_RATE)+'.pth')
         fig = plt.figure()
         plt.plot(train_accuracy)
         plt.plot(test_accuracy)
