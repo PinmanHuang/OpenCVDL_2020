@@ -38,9 +38,9 @@ class Ui_MainWindow(object):
         self.pushButton_14 = QtWidgets.QPushButton(self.groupBox_7)
         self.pushButton_14.setGeometry(QtCore.QRect(30, 250, 161, 41))
         self.pushButton_14.setObjectName("pushButton_14")
-        self.textEdit = QtWidgets.QTextEdit(self.groupBox_7)
-        self.textEdit.setGeometry(QtCore.QRect(30, 220, 161, 21))
-        self.textEdit.setObjectName("textEdit")
+        self.lineEdit = QtWidgets.QLineEdit(self.groupBox_7)
+        self.lineEdit.setGeometry(QtCore.QRect(30, 220, 161, 20))
+        self.lineEdit.setObjectName("lineEdit")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -58,8 +58,4 @@ class Ui_MainWindow(object):
         self.pushButton_12.setText(_translate("MainWindow", "5.3 Show Model Strucuture"))
         self.pushButton_13.setText(_translate("MainWindow", "5.4 Show Accuracy"))
         self.pushButton_14.setText(_translate("MainWindow", "5.5 Test"))
-        self.textEdit.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'PMingLiU\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">(0~9999)</p></body></html>"))
+        self.lineEdit.setText(_translate("MainWindow", "(0~9999)"))
