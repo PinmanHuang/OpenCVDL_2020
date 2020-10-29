@@ -5,6 +5,8 @@
     * [Prerequisites](#prerequisites)
     * [Installation](#installation)
 # About the Homework 1
+![Hw1](https://i.imgur.com/JGxIRC9.png)
+![Q5](https://i.imgur.com/oCZRHUI.png)
 ## VGG16
 Training cifar10 classifier using VGG16.
 * Dataset: Cifar10
