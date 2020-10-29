@@ -288,7 +288,7 @@ class OpenCv(object):
         # Convolution
         gaussian_img = self.convolve2d(img, gaussian_kernel)
         sobel_x_img = self.convolve2d(gaussian_img, sobel_x_kernel)
-        sobel_x_img = cv2.normalize(sobel_x_img, None, 0, 255, cv2.NORM_MINMAX)
+        # sobel_x_img = cv2.normalize(sobel_x_img, None, 0, 255, cv2.NORM_MINMAX)
 
         # cv2.namedWindow('Gaussian Blur', cv2.WINDOW_NORMAL)
         # cv2.imshow('Gaussian Blur', gaussian_img)
@@ -312,7 +312,7 @@ class OpenCv(object):
         # Convolution
         gaussian_img = self.convolve2d(img, gaussian_kernel)
         sobel_y_img = self.convolve2d(gaussian_img, sobel_y_kernel)
-        sobel_y_img = cv2.normalize(sobel_y_img, None, 0, 255, cv2.NORM_MINMAX)
+        # sobel_y_img = cv2.normalize(sobel_y_img, None, 0, 255, cv2.NORM_MINMAX)
 
         # cv2.namedWindow('Gaussian Blur', cv2.WINDOW_NORMAL)
         # cv2.imshow('Gaussian Blur', gaussian_img)
