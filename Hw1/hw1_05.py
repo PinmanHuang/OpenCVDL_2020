@@ -22,12 +22,12 @@ import random
 from torchsummary import summary
 
 # CUDA
-CUDA_DEVICE_IDEX = 1
+CUDA_DEVICE_IDEX = 0
 BATCH_SIZE = 32
 LEARNING_RATE = 1e-2
 EPOCHES = 80
-OPTIMIZER = 'ADAM'
-USING_MODEL = 'VGG16_'+OPTIMIZER+'_'+str(BATCH_SIZE)+'_'+str(LEARNING_RATE)
+OPTIMIZER = 'SGD'
+USING_MODEL = 'VGG16_'+OPTIMIZER+'MOM_'+str(BATCH_SIZE)+'_'+str(LEARNING_RATE)
 
 class PyMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -59,8 +59,8 @@ class PyMainWindow(QMainWindow, Ui_MainWindow):
     def show_accuracy(self):
         print('Show accuracy')
         model = Model()
-        model.train()
-        # model.Q5_4()
+        # model.train()
+        model.Q5_4()
 
     def test(self):
         print('Test')
@@ -238,7 +238,8 @@ class Model(object):
         # Define loss and optimizer
         criterion = nn.CrossEntropyLoss()
         # optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE)    # SGD
-        optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)   # Adam
+        optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9, nesterov=True)    # SGD-Momentum-Nesterov
+        # optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)   # Adam
         # Train the model
         for epoch in range(EPOCHES):
             running_loss = 0.0
@@ -288,7 +289,7 @@ class Model(object):
                 correct_eval.item() / (BATCH_SIZE * (j + 1)) * 100)
             )
             print()
-        torch.save(model.state_dict(), './VGG16_'+OPTIMIZER+'_'+str(BATCH_SIZE)+'_'+str(LEARNING_RATE)+'.pth')
+        torch.save(model.state_dict(), USING_MODEL+'.pth')
         fig = plt.figure()
         plt.plot(train_accuracy)
         plt.plot(test_accuracy)
