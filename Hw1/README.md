@@ -10,6 +10,7 @@
 ## VGG16
 Training cifar10 classifier using VGG16.
 * Dataset: Cifar10
+* [Model](https://drive.google.com/drive/folders/17_0pd40iayfL_n9jmDu-eSZJbS3GZESh?usp=sharing)
 # Getting Started
 ## Prerequisites
 * Python=3.7
