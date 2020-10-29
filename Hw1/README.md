@@ -1,6 +1,6 @@
 # Table of Contents
 * [About the Homework 1](#about-the-homework-1)
-    * VGG16
+    * [VGG16](#VGG16)
 * [Getting Started](#getting-started)
     * [Prerequisites](#prerequisites)
     * [Installation](#installation)
