@@ -45,59 +45,59 @@ class PyMainWindow(QMainWindow, Ui_MainWindow):
     
     # === Q1 ===
     def load_image(self):
-        print('Load image')
+        # print('Load image')
         opencv = OpenCv()
         opencv.Q1_1()
 
     def color_seperation(self):
-        print('Color seperation')
+        # print('Color seperation')
         opencv = OpenCv()
         opencv.Q1_2()
     
     def image_flipping(self):
-        print('Image flipping')
+        # print('Image flipping')
         opencv = OpenCv()
         opencv.Q1_3()
     
     def blending(self):
-        print('Blending')
+        # print('Blending')
         opencv = OpenCv()
         opencv.Q1_4()
 
     # === Q2 ===
     def median_filter(self):
-        print('Median filter')
+        # print('Median filter')
         opencv = OpenCv()
         opencv.Q2_1()
 
     def gaussian_blur(self):
-        print('Gaussian blur')
+        # print('Gaussian blur')
         opencv = OpenCv()
         opencv.Q2_2()
     
     def bilateral_filter(self):
-        print('Bilateral filter')
+        # print('Bilateral filter')
         opencv = OpenCv()
         opencv.Q2_3()
 
     # === Q3 ===
     def gaussian_blur_2(self):
-        print('Gaussian blur')
+        # print('Gaussian blur')
         opencv = OpenCv()
         opencv.Q3_1()
 
     def sobel_x(self):
-        print('Sobel x')
+        # print('Sobel x')
         opencv = OpenCv()
         opencv.Q3_2()
     
     def sobel_y(self):
-        print('Sobel x')
+        # print('Sobel x')
         opencv = OpenCv()
         opencv.Q3_3()
     
     def magnitude(self):
-        print('Magnitude')
+        # print('Magnitude')
         opencv = OpenCv()
         opencv.Q3_4()
 
@@ -115,7 +115,7 @@ class PyMainWindow(QMainWindow, Ui_MainWindow):
         self.ty = text
 
     def transformation(self):
-        print('transformation')
+        # print('transformation')
         # print('rotation: {}\tscaling: {}\ttx: {}\tty: {}'.format(
             # str(self.rotation), str(self.scaling), str(self.tx), str(self.ty)))
         opencv = OpenCv()
@@ -363,8 +363,8 @@ class OpenCv(object):
     
     def Q4(self, rotate, scale, tx, ty):
         # ref: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_geometric_transformations/py_geometric_transformations.html
-        print('rotation: {}\tscaling: {}\ttx: {}\tty: {}'.format(
-            rotate, scale, tx, ty))
+        # print('rotation: {}\tscaling: {}\ttx: {}\tty: {}'.format(
+        #     rotate, scale, tx, ty))
         if not len(rotate) or not len(scale) or not len(tx) or not len(ty):
             return
         img = cv2.imread('./Q4_Image/Parrot.png')
