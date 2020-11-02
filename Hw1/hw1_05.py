@@ -339,8 +339,10 @@ class Model(object):
         image, label = dataiter.next()
 
         # Load Model
-        model = VGG16()
-        model.load_state_dict(torch.load('./model/'+USING_MODEL+'.pth'))
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print('Device: {}'.format(device))
+        model = VGG16().to(device)
+        model.load_state_dict(torch.load('./model/'+USING_MODEL+'.pth', map_location=device))
         model.eval()
         # Evaluate
         output = model(image)
