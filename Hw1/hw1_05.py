@@ -42,28 +42,28 @@ class PyMainWindow(QMainWindow, Ui_MainWindow):
         self.lineEdit.textChanged.connect(self.test_image_changed)
 
     def show_train_images(self):
-        print('Show train images')
+        # print('Show train images')
         model = Model()
         model.Q5_1()
 
     def show_hyperparameters(self):
-        print('Show hyperparameters')
+        # print('Show hyperparameters')
         model = Model()
         model.Q5_2()
     
     def show_model_strucuture(self):
-        print('Show model strucuture')
+        # print('Show model strucuture')
         model = Model()
         model.Q5_3()
     
     def show_accuracy(self):
-        print('Show accuracy')
+        # print('Show accuracy')
         model = Model()
         # model.train()
         model.Q5_4()
 
     def test(self):
-        print('Test')
+        # print('Test')
         model = Model()
         model.Q5_5(self.test_image_idx)
 
